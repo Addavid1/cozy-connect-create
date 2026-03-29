@@ -1,6 +1,6 @@
 import { useState, useCallback, useEffect } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
-import SilhouetteCharacter from "./SilhouetteCharacter";
+import CinemaAudience from "./CinemaAudience";
 import galleryBraids from "@/assets/gallery-braids-new.jpg";
 import galleryBridal from "@/assets/gallery-bridal.jpg";
 import galleryLounge from "@/assets/gallery-lounge.jpg";

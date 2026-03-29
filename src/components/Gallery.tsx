@@ -4,7 +4,7 @@ import galleryBridal from "@/assets/gallery-bridal.jpg";
 import galleryLounge from "@/assets/gallery-lounge.jpg";
 import galleryNailart from "@/assets/gallery-nailart-new.jpg";
 import galleryLocs from "@/assets/gallery-locs.jpg";
-import galleryProducts from "@/assets/gallery-products.jpg";
+import galleryProducts from "@/assets/gallery-products.png";
 import heroSalon from "@/assets/hero-salon.jpg";
 import serviceHair from "@/assets/service-hair.jpg";
 import { X } from "lucide-react";

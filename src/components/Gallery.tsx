@@ -219,6 +219,7 @@ const Gallery = () => {
             <div className="absolute -bottom-12 md:-bottom-14 left-1/2 -translate-x-1/2 z-20 w-full px-4">
               <CinemaAudience isReacting={isClapping} />
             </div>
+          </div>
 
           {/* Image caption & counter */}
           <div className="text-center mt-6">

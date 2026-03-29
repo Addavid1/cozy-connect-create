@@ -1,8 +1,8 @@
 import { useState } from "react";
-import galleryBraids from "@/assets/gallery-braids.jpg";
+import galleryBraids from "@/assets/gallery-braids-new.jpg";
 import galleryBridal from "@/assets/gallery-bridal.jpg";
 import galleryLounge from "@/assets/gallery-lounge.jpg";
-import galleryNailart from "@/assets/gallery-nailart.jpg";
+import galleryNailart from "@/assets/gallery-nailart-new.jpg";
 import galleryLocs from "@/assets/gallery-locs.jpg";
 import galleryProducts from "@/assets/gallery-products.jpg";
 import heroSalon from "@/assets/hero-salon.jpg";

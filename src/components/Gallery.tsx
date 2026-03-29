@@ -215,67 +215,10 @@ const Gallery = () => {
               />
             </div>
 
-            {/* Character on stage */}
-            <div className="absolute bottom-2 left-1/2 -translate-x-1/2 z-20">
-              <SilhouetteCharacter isClapping={isClapping} />
+            {/* Cinema audience on stage */}
+            <div className="absolute -bottom-12 md:-bottom-14 left-1/2 -translate-x-1/2 z-20 w-full px-4">
+              <CinemaAudience isReacting={isClapping} />
             </div>
-
-            {/* Navigation arrows */}
-            <button
-              onClick={goPrev}
-              disabled={isTransitioning}
-              className="absolute left-2 md:-left-14 top-1/2 -translate-y-1/2 z-30 w-10 h-10 md:w-12 md:h-12 rounded-full flex items-center justify-center transition-all duration-300 disabled:opacity-30"
-              style={{
-                backgroundColor: "hsl(30 30% 12% / 0.7)",
-                backdropFilter: "blur(4px)",
-              }}
-              aria-label="Previous image"
-            >
-              <ChevronLeft className="w-5 h-5 md:w-6 md:h-6 text-cream" />
-            </button>
-            <button
-              onClick={goNext}
-              disabled={isTransitioning}
-              className="absolute right-2 md:-right-14 top-1/2 -translate-y-1/2 z-30 w-10 h-10 md:w-12 md:h-12 rounded-full flex items-center justify-center transition-all duration-300 disabled:opacity-30"
-              style={{
-                backgroundColor: "hsl(30 30% 12% / 0.7)",
-                backdropFilter: "blur(4px)",
-              }}
-              aria-label="Next image"
-            >
-              <ChevronRight className="w-5 h-5 md:w-6 md:h-6 text-cream" />
-            </button>
-          </div>
-
-          {/* Audience seats - faint shadows */}
-          <div className="flex justify-center gap-1 mt-2 opacity-20">
-            {[...Array(15)].map((_, i) => (
-              <div
-                key={i}
-                className="rounded-t-full"
-                style={{
-                  width: `${18 + Math.sin(i * 0.8) * 4}px`,
-                  height: `${14 + Math.cos(i * 1.2) * 3}px`,
-                  backgroundColor: "hsl(30 30% 12%)",
-                  transform: `translateY(${Math.sin(i * 0.5) * 2}px)`,
-                }}
-              />
-            ))}
-          </div>
-          <div className="flex justify-center gap-1 mt-0.5 opacity-10 px-8">
-            {[...Array(19)].map((_, i) => (
-              <div
-                key={i}
-                className="rounded-t-full"
-                style={{
-                  width: `${16 + Math.sin(i * 0.6) * 3}px`,
-                  height: `${12 + Math.cos(i * 0.9) * 2}px`,
-                  backgroundColor: "hsl(30 30% 12%)",
-                  transform: `translateY(${Math.sin(i * 0.7) * 2}px)`,
-                }}
-              />
-            ))}
-          </div>
 
           {/* Image caption & counter */}
           <div className="text-center mt-6">

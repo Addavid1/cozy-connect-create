@@ -215,14 +215,30 @@ const Gallery = () => {
               />
             </div>
 
-            {/* Cinema audience on stage */}
-            <div className="absolute -bottom-12 md:-bottom-14 left-1/2 -translate-x-1/2 z-20 w-full px-4">
+            {/* Cinema audience overlapping the bottom of the screen */}
+            <div className="absolute -bottom-16 md:-bottom-20 left-1/2 -translate-x-1/2 z-20 w-full px-2">
               <CinemaAudience isReacting={isClapping} />
             </div>
+
+            {/* Navigation arrows */}
+            <button
+              onClick={goPrev}
+              className="absolute left-2 md:-left-14 top-1/2 -translate-y-1/2 z-30 w-10 h-10 md:w-12 md:h-12 rounded-full bg-espresso/70 hover:bg-espresso/90 flex items-center justify-center transition-colors backdrop-blur-sm"
+              aria-label="Previous image"
+            >
+              <ChevronLeft className="w-5 h-5 md:w-6 md:h-6 text-cream" />
+            </button>
+            <button
+              onClick={goNext}
+              className="absolute right-2 md:-right-14 top-1/2 -translate-y-1/2 z-30 w-10 h-10 md:w-12 md:h-12 rounded-full bg-espresso/70 hover:bg-espresso/90 flex items-center justify-center transition-colors backdrop-blur-sm"
+              aria-label="Next image"
+            >
+              <ChevronRight className="w-5 h-5 md:w-6 md:h-6 text-cream" />
+            </button>
           </div>
 
           {/* Image caption & counter */}
-          <div className="text-center mt-6">
+          <div className="text-center mt-20 md:mt-24">
             <p className="font-display text-lg text-foreground">
               {images[displayIndex].alt}
             </p>

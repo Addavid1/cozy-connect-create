@@ -1,258 +1,171 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 
 interface CinemaAudienceProps {
   isReacting: boolean;
 }
-
-// 6 distinct women with different skin tones, hairstyles, and accessories
-const women = [
-  {
-    id: 1,
-    name: "Nneka",
-    skinTone: "hsl(25 55% 40%)",
-    skinHighlight: "hsl(25 50% 48%)",
-    hairColor: "hsl(0 0% 8%)",
-    hairStyle: "afro" as const,
-    topColor: "hsl(340 70% 45%)",
-    earringColor: "hsl(45 90% 55%)",
-    lipColor: "hsl(350 60% 42%)",
-  },
-  {
-    id: 2,
-    name: "Adaeze",
-    skinTone: "hsl(20 50% 35%)",
-    skinHighlight: "hsl(20 45% 42%)",
-    hairColor: "hsl(25 40% 12%)",
-    hairStyle: "braids" as const,
-    topColor: "hsl(200 65% 40%)",
-    earringColor: "hsl(38 85% 55%)",
-    lipColor: "hsl(355 55% 40%)",
-  },
-  {
-    id: 3,
-    name: "Chioma",
-    skinTone: "hsl(22 48% 38%)",
-    skinHighlight: "hsl(22 44% 45%)",
-    hairColor: "hsl(0 0% 5%)",
-    hairStyle: "bun" as const,
-    topColor: "hsl(45 75% 50%)",
-    earringColor: "hsl(0 0% 85%)",
-    lipColor: "hsl(0 65% 45%)",
-  },
-  {
-    id: 4,
-    name: "Ifunanya",
-    skinTone: "hsl(18 52% 42%)",
-    skinHighlight: "hsl(18 48% 50%)",
-    hairColor: "hsl(350 30% 15%)",
-    hairStyle: "locs" as const,
-    topColor: "hsl(145 50% 35%)",
-    earringColor: "hsl(38 80% 50%)",
-    lipColor: "hsl(345 50% 40%)",
-  },
-  {
-    id: 5,
-    name: "Ngozi",
-    skinTone: "hsl(24 45% 32%)",
-    skinHighlight: "hsl(24 40% 40%)",
-    hairColor: "hsl(0 0% 10%)",
-    hairStyle: "straight" as const,
-    topColor: "hsl(280 55% 40%)",
-    earringColor: "hsl(45 85% 60%)",
-    lipColor: "hsl(340 55% 38%)",
-  },
-  {
-    id: 6,
-    name: "Zainab",
-    skinTone: "hsl(20 60% 36%)",
-    skinHighlight: "hsl(20 55% 44%)",
-    hairColor: "hsl(15 30% 10%)",
-    hairStyle: "short" as const,
-    topColor: "hsl(15 70% 50%)",
-    earringColor: "hsl(38 90% 55%)",
-    lipColor: "hsl(5 60% 42%)",
-  },
-];
 
 const speechBubbles = [
   "Emeka did THAT! 💅",
   "She's gorgeous! ✨",
   "The braids though! 😍",
   "Stunning work! 🔥",
-  "Pass the popcorn! 🍿",
   "Look at her glow! ✨",
   "Absolutely beautiful!",
   "Emeka never misses! 💫",
+  "Goals fr! 🙌",
+];
+
+// 6 women with distinct silhouette hairstyles (viewed from behind)
+const women = [
+  { id: 1, name: "highBun", seatX: 70 },
+  { id: 2, name: "longStraight", seatX: 180 },
+  { id: 3, name: "braids", seatX: 290 },
+  { id: 4, name: "shortBob", seatX: 400 },
+  { id: 5, name: "headwrap", seatX: 510 },
+  { id: 6, name: "volumeCurls", seatX: 620 },
 ];
 
 const CinemaAudience = ({ isReacting }: CinemaAudienceProps) => {
-  const [reactionFrame, setReactionFrame] = useState(0);
-  const [activeSpeaker, setActiveSpeaker] = useState(-1);
-  const [speechText, setSpeechText] = useState("");
+  const [frame, setFrame] = useState(0);
   const [popcornHolder, setPopcornHolder] = useState(2);
+  const [activeSpeakers, setActiveSpeakers] = useState<number[]>([]);
+  const [speechTexts, setSpeechTexts] = useState<string[]>([]);
+  const prevReacting = useRef(false);
 
   useEffect(() => {
-    if (!isReacting) {
-      setReactionFrame(0);
-      setActiveSpeaker(-1);
-      return;
+    if (isReacting && !prevReacting.current) {
+      // New reaction triggered — cycle through frames
+      let f = 1;
+      setFrame(1);
+
+      // Pick 2 random speakers
+      const s1 = Math.floor(Math.random() * 6);
+      let s2 = (s1 + 2 + Math.floor(Math.random() * 3)) % 6;
+      setActiveSpeakers([s1, s2]);
+      setSpeechTexts([
+        speechBubbles[Math.floor(Math.random() * speechBubbles.length)],
+        speechBubbles[Math.floor(Math.random() * speechBubbles.length)],
+      ]);
+
+      const interval = setInterval(() => {
+        f++;
+        setFrame(f);
+        if (f === 3) {
+          setPopcornHolder((prev) => (prev + 1) % 6);
+        }
+        if (f >= 6) {
+          clearInterval(interval);
+          setFrame(0);
+          setActiveSpeakers([]);
+        }
+      }, 150);
+
+      prevReacting.current = true;
+      return () => clearInterval(interval);
     }
-
-    let frame = 0;
-    const interval = setInterval(() => {
-      frame++;
-      setReactionFrame(frame);
-
-      // Pick a random speaker and speech bubble
-      if (frame === 2) {
-        const speaker = Math.floor(Math.random() * 6);
-        setActiveSpeaker(speaker);
-        setSpeechText(speechBubbles[Math.floor(Math.random() * speechBubbles.length)]);
-      }
-
-      // Pass popcorn
-      if (frame === 4) {
-        setPopcornHolder((prev) => (prev + 1) % 6);
-      }
-
-      if (frame >= 10) {
-        clearInterval(interval);
-        setActiveSpeaker(-1);
-      }
-    }, 90);
-
-    return () => clearInterval(interval);
+    if (!isReacting) {
+      prevReacting.current = false;
+    }
   }, [isReacting]);
 
-  const getHeadTilt = (index: number) => {
-    if (!isReacting || reactionFrame === 0) {
-      // Idle: slight natural tilt variation
-      return [3, -2, 4, -3, 2, -4][index];
-    }
-    const cycle = reactionFrame % 4;
-    const base = [5, -8, 10, -6, 8, -10][index];
-    return cycle % 2 === 0 ? base : base * 0.3;
+  // Per-character pose based on current frame
+  const getPose = (index: number) => {
+    const baseY = 0;
+    const baseTilt = [2, -1, 3, -2, 1, -3][index];
+
+    if (frame === 0) return { tilt: baseTilt, shiftY: baseY, lean: 0 };
+
+    // Frame-specific reactions
+    const poses: Record<number, { tilt: number; shiftY: number; lean: number }> = {
+      1: { tilt: baseTilt, shiftY: 0, lean: 0 },
+      2: { tilt: baseTilt + (index % 2 === 0 ? 4 : -4), shiftY: -1, lean: index === popcornHolder ? 3 : 0 },
+      3: { tilt: baseTilt + (index % 3 === 0 ? 6 : -3), shiftY: -2, lean: index % 2 === 0 ? 2 : -2 },
+      4: { tilt: baseTilt + (activeSpeakers.includes(index) ? 8 : 2), shiftY: activeSpeakers.includes(index) ? -3 : 0, lean: index % 2 === 0 ? 4 : -1 },
+      5: { tilt: baseTilt + (index === 0 ? -5 : index === 3 ? 5 : 3), shiftY: index === 1 ? -4 : -1, lean: 0 },
+      6: { tilt: baseTilt, shiftY: 0, lean: 0 },
+    };
+    return poses[frame] || poses[1];
   };
 
-  const getBodyBounce = (index: number) => {
-    if (!isReacting || reactionFrame === 0) return 0;
-    const offset = index * 0.7;
-    return Math.sin((reactionFrame + offset) * 1.2) * 3;
-  };
-
-  const renderHair = (woman: typeof women[0], headCx: number, headCy: number) => {
-    const { hairColor, hairStyle } = woman;
-    switch (hairStyle) {
-      case "afro":
+  const renderHairSilhouette = (type: string, cx: number, headY: number) => {
+    const dark = "hsl(var(--espresso))";
+    switch (type) {
+      case "highBun":
         return (
           <g>
-            <ellipse cx={headCx} cy={headCy - 2} rx={18} ry={19} fill={hairColor} />
-            {/* Volume detail curls */}
-            {[...Array(8)].map((_, i) => {
-              const angle = (i / 8) * Math.PI * 2;
-              const x = headCx + Math.cos(angle) * 15;
-              const y = headCy - 2 + Math.sin(angle) * 16;
-              return <circle key={i} cx={x} cy={y} r={4} fill={hairColor} opacity={0.8} />;
-            })}
+            <ellipse cx={cx} cy={headY - 2} rx={14} ry={15} fill={dark} />
+            <circle cx={cx} cy={headY - 20} r={9} fill={dark} />
+          </g>
+        );
+      case "longStraight":
+        return (
+          <g>
+            <ellipse cx={cx} cy={headY - 2} rx={14} ry={15} fill={dark} />
+            <rect x={cx - 14} y={headY + 5} width={28} height={35} rx={4} fill={dark} />
           </g>
         );
       case "braids":
         return (
           <g>
-            <ellipse cx={headCx} cy={headCy - 5} rx={14} ry={12} fill={hairColor} />
-            {/* Braids hanging down */}
-            {[-10, -6, -2, 2, 6, 10].map((offset, i) => (
-              <line
-                key={i}
-                x1={headCx + offset}
-                y1={headCy + 8}
-                x2={headCx + offset * 1.3}
-                y2={headCy + 28 + Math.sin(i) * 3}
-                stroke={hairColor}
-                strokeWidth={2.5}
-                strokeLinecap="round"
-              />
-            ))}
-          </g>
-        );
-      case "bun":
-        return (
-          <g>
-            <ellipse cx={headCx} cy={headCy - 5} rx={13} ry={10} fill={hairColor} />
-            <circle cx={headCx} cy={headCy - 16} r={8} fill={hairColor} />
-            {/* Bun shine */}
-            <circle cx={headCx - 2} cy={headCy - 18} r={2.5} fill="white" opacity={0.08} />
-          </g>
-        );
-      case "locs":
-        return (
-          <g>
-            <ellipse cx={headCx} cy={headCy - 4} rx={14} ry={11} fill={hairColor} />
-            {/* Thick locs */}
-            {[-9, -5, -1, 3, 7, 11].map((offset, i) => (
+            <ellipse cx={cx} cy={headY - 2} rx={14} ry={15} fill={dark} />
+            {[-8, -3, 2, 7].map((offset, i) => (
               <path
                 key={i}
-                d={`M${headCx + offset},${headCy + 6} Q${headCx + offset + (i % 2 === 0 ? 3 : -3)},${headCy + 18} ${headCx + offset},${headCy + 30 + i * 2}`}
-                stroke={hairColor}
-                strokeWidth={3}
+                d={`M${cx + offset},${headY + 10} Q${cx + offset + (i % 2 ? 4 : -4)},${headY + 28} ${cx + offset},${headY + 42}`}
+                stroke={dark}
+                strokeWidth={4}
                 fill="none"
                 strokeLinecap="round"
               />
             ))}
           </g>
         );
-      case "straight":
+      case "shortBob":
         return (
           <g>
-            <ellipse cx={headCx} cy={headCy - 4} rx={14} ry={11} fill={hairColor} />
-            {/* Straight flowing hair */}
-            <path
-              d={`M${headCx - 13},${headCy} Q${headCx - 15},${headCy + 15} ${headCx - 12},${headCy + 28}`}
-              stroke={hairColor}
-              strokeWidth={5}
-              fill="none"
-              strokeLinecap="round"
-            />
-            <path
-              d={`M${headCx + 13},${headCy} Q${headCx + 15},${headCy + 15} ${headCx + 12},${headCy + 28}`}
-              stroke={hairColor}
-              strokeWidth={5}
-              fill="none"
-              strokeLinecap="round"
-            />
+            <ellipse cx={cx} cy={headY - 1} rx={16} ry={16} fill={dark} />
+            <rect x={cx - 16} y={headY + 2} width={32} height={12} rx={6} fill={dark} />
           </g>
         );
-      case "short":
+      case "headwrap":
         return (
           <g>
-            <ellipse cx={headCx} cy={headCy - 5} rx={14} ry={12} fill={hairColor} />
-            {/* Textured short hair details */}
-            {[...Array(5)].map((_, i) => {
-              const angle = (i / 5) * Math.PI - Math.PI * 0.1;
-              const x = headCx + Math.cos(angle) * 12;
-              const y = headCy - 6 + Math.sin(angle) * -10;
-              return <circle key={i} cx={x} cy={y} r={3} fill={hairColor} opacity={0.9} />;
+            <ellipse cx={cx} cy={headY - 4} rx={16} ry={18} fill={dark} />
+            {/* Wrap ridge detail */}
+            <ellipse cx={cx} cy={headY - 12} rx={14} ry={6} fill="none" stroke="hsl(250 40% 25%)" strokeWidth={1.5} opacity={0.4} />
+            <ellipse cx={cx} cy={headY - 6} rx={15} ry={5} fill="none" stroke="hsl(250 40% 25%)" strokeWidth={1} opacity={0.3} />
+          </g>
+        );
+      case "volumeCurls":
+        return (
+          <g>
+            <ellipse cx={cx} cy={headY - 2} rx={18} ry={19} fill={dark} />
+            {[...Array(10)].map((_, i) => {
+              const angle = (i / 10) * Math.PI * 2;
+              const r = 16 + Math.sin(i * 2) * 2;
+              const x = cx + Math.cos(angle) * r;
+              const y = headY - 2 + Math.sin(angle) * (r + 1);
+              return <circle key={i} cx={x} cy={y} r={4} fill={dark} />;
             })}
           </g>
         );
+      default:
+        return <ellipse cx={cx} cy={headY} rx={14} ry={15} fill={dark} />;
     }
   };
 
   const renderPopcorn = (x: number, y: number) => (
     <g>
-      {/* Popcorn bucket */}
       <path
-        d={`M${x - 6},${y} L${x - 8},${y + 14} L${x + 8},${y + 14} L${x + 6},${y} Z`}
-        fill="hsl(0 75% 50%)"
-        stroke="hsl(0 60% 40%)"
-        strokeWidth={0.5}
+        d={`M${x - 7},${y} L${x - 9},${y + 16} L${x + 9},${y + 16} L${x + 7},${y} Z`}
+        fill="hsl(0 70% 45%)"
       />
       {/* Stripes */}
-      <line x1={x - 3} y1={y + 1} x2={x - 4} y2={y + 13} stroke="hsl(45 90% 85%)" strokeWidth={1.5} />
-      <line x1={x + 3} y1={y + 1} x2={x + 4} y2={y + 13} stroke="hsl(45 90% 85%)" strokeWidth={1.5} />
-      {/* Popcorn pieces */}
-      {[[-4, -3], [0, -4], [4, -3], [-2, -6], [2, -5]].map(([ox, oy], i) => (
-        <circle key={i} cx={x + ox} cy={y + oy} r={2.5} fill="hsl(45 80% 80%)" />
+      <line x1={x - 3} y1={y + 1} x2={x - 4} y2={y + 15} stroke="hsl(45 90% 85%)" strokeWidth={1.5} />
+      <line x1={x + 3} y1={y + 1} x2={x + 4} y2={y + 15} stroke="hsl(45 90% 85%)" strokeWidth={1.5} />
+      {/* Popcorn kernels */}
+      {[[-5, -3], [0, -5], [5, -3], [-2, -7], [3, -6]].map(([ox, oy], i) => (
+        <circle key={i} cx={x + ox} cy={y + oy} r={3} fill="hsl(45 80% 80%)" />
       ))}
     </g>
   );
@@ -260,234 +173,210 @@ const CinemaAudience = ({ isReacting }: CinemaAudienceProps) => {
   return (
     <div className="relative w-full flex justify-center">
       <svg
-        viewBox="0 0 660 140"
-        className="w-full max-w-3xl h-auto select-none"
-        style={{ filter: "drop-shadow(0 2px 8px rgba(0,0,0,0.2))" }}
+        viewBox="0 0 700 165"
+        className="w-full max-w-4xl h-auto select-none"
+        style={{ filter: "drop-shadow(0 4px 12px rgba(0,0,0,0.3))" }}
       >
-        {/* Cinema seats row */}
-        {women.map((_, i) => {
-          const cx = 55 + i * 100;
+        <defs>
+          {/* Rim light gradient for screen glow */}
+          <radialGradient id="screenGlow" cx="50%" cy="0%" r="80%">
+            <stop offset="0%" stopColor="hsl(250 60% 70%)" stopOpacity="0.15" />
+            <stop offset="60%" stopColor="hsl(230 50% 50%)" stopOpacity="0.05" />
+            <stop offset="100%" stopColor="transparent" stopOpacity="0" />
+          </radialGradient>
+          {/* Rim light for silhouette edges */}
+          <linearGradient id="rimLight" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stopColor="hsl(250 50% 75%)" stopOpacity="0.5" />
+            <stop offset="100%" stopColor="hsl(270 40% 60%)" stopOpacity="0.1" />
+          </linearGradient>
+        </defs>
+
+        {/* Ambient screen glow on audience */}
+        <rect x="0" y="0" width="700" height="165" fill="url(#screenGlow)" />
+
+        {/* Cinema seat row — curved arrangement */}
+        {women.map((w, i) => {
+          const cx = w.seatX;
+          const seatY = 100;
           return (
             <g key={`seat-${i}`}>
               {/* Seat back */}
               <rect
-                x={cx - 28}
-                y={75}
-                width={56}
+                x={cx - 32}
+                y={seatY}
+                width={64}
                 height={55}
-                rx={6}
-                fill="hsl(0 65% 28%)"
+                rx={8}
+                fill="hsl(0 50% 22%)"
+                opacity={0.6}
               />
-              {/* Seat cushion */}
+              {/* Seat cushion top edge */}
               <rect
-                x={cx - 26}
-                y={105}
-                width={52}
-                height={16}
+                x={cx - 30}
+                y={seatY + 2}
+                width={60}
+                height={8}
                 rx={4}
-                fill="hsl(0 60% 32%)"
+                fill="hsl(0 45% 26%)"
+                opacity={0.5}
               />
               {/* Armrests */}
-              <rect x={cx - 30} y={88} width={5} height={32} rx={2} fill="hsl(30 20% 25%)" />
-              <rect x={cx + 25} y={88} width={5} height={32} rx={2} fill="hsl(30 20% 25%)" />
+              <rect x={cx - 34} y={seatY + 8} width={5} height={40} rx={2} fill="hsl(30 15% 18%)" opacity={0.5} />
+              <rect x={cx + 29} y={seatY + 8} width={5} height={40} rx={2} fill="hsl(30 15% 18%)" opacity={0.5} />
+              {/* Cup holder detail */}
+              {i % 2 === 1 && (
+                <circle cx={cx + 32} cy={seatY + 30} r={4} fill="hsl(30 10% 15%)" opacity={0.4} />
+              )}
             </g>
           );
         })}
 
-        {/* Women characters */}
-        {women.map((woman, i) => {
-          const cx = 55 + i * 100;
-          const headCy = 42;
-          const bounce = getBodyBounce(i);
-          const tilt = getHeadTilt(i);
+        {/* Women silhouettes — viewed from behind */}
+        {women.map((w, i) => {
+          const cx = w.seatX;
+          const headY = 48;
+          const pose = getPose(i);
           const hasPopcorn = popcornHolder === i;
-          const isSpeaking = activeSpeaker === i;
+          const isSpeaking = activeSpeakers.includes(i);
 
           return (
-            <g key={woman.id}>
-              {/* Body group with bounce */}
+            <g key={w.id}>
+              {/* Body group with animated pose */}
               <g
                 style={{
-                  transform: `translateY(${bounce}px)`,
-                  transition: "transform 0.1s ease-out",
+                  transform: `translateY(${pose.shiftY}px)`,
+                  transition: "transform 0.25s ease-out",
                 }}
               >
-                {/* Torso / top */}
+                {/* Shoulders & upper body silhouette */}
                 <path
-                  d={`M${cx - 16},${headCy + 22} Q${cx},${headCy + 18} ${cx + 16},${headCy + 22} L${cx + 20},${headCy + 55} L${cx - 20},${headCy + 55} Z`}
-                  fill={woman.topColor}
+                  d={`M${cx - 20},${headY + 25} Q${cx},${headY + 18} ${cx + 20},${headY + 25} L${cx + 24},${headY + 70} L${cx - 24},${headY + 70} Z`}
+                  fill="hsl(var(--espresso))"
                 />
-                {/* Neckline detail */}
+
+                {/* Rim light on shoulders */}
                 <path
-                  d={`M${cx - 8},${headCy + 20} Q${cx},${headCy + 25} ${cx + 8},${headCy + 20}`}
-                  stroke={woman.skinTone}
-                  strokeWidth={2}
-                  fill={woman.skinTone}
+                  d={`M${cx - 18},${headY + 25} Q${cx},${headY + 19} ${cx + 18},${headY + 25}`}
+                  stroke="hsl(250 50% 70%)"
+                  strokeWidth={1.2}
+                  fill="none"
+                  opacity={0.4}
+                  strokeLinecap="round"
                 />
 
                 {/* Neck */}
-                <rect
-                  x={cx - 4}
-                  y={headCy + 12}
-                  width={8}
-                  height={10}
-                  rx={3}
-                  fill={woman.skinTone}
-                />
+                <rect x={cx - 5} y={headY + 14} width={10} height={12} rx={4} fill="hsl(var(--espresso))" />
 
                 {/* Head with tilt */}
                 <g
                   style={{
-                    transformOrigin: `${cx}px ${headCy}px`,
-                    transform: `rotate(${tilt}deg)`,
-                    transition: "transform 0.15s ease-out",
+                    transformOrigin: `${cx}px ${headY}px`,
+                    transform: `rotate(${pose.tilt}deg)`,
+                    transition: "transform 0.3s ease-out",
                   }}
                 >
-                  {/* Hair behind head */}
-                  {renderHair(woman, cx, headCy)}
+                  {renderHairSilhouette(w.name, cx, headY)}
 
-                  {/* Face */}
-                  <ellipse cx={cx} cy={headCy} rx={12} ry={13} fill={woman.skinTone} />
-
-                  {/* Face highlight */}
-                  <ellipse cx={cx - 3} cy={headCy - 3} rx={6} ry={7} fill={woman.skinHighlight} opacity={0.3} />
-
-                  {/* Eyes */}
-                  <ellipse cx={cx - 4} cy={headCy - 1} rx={2} ry={2.2} fill="hsl(0 0% 10%)" />
-                  <ellipse cx={cx + 4} cy={headCy - 1} rx={2} ry={2.2} fill="hsl(0 0% 10%)" />
-                  {/* Eye shine */}
-                  <circle cx={cx - 3.5} cy={headCy - 1.8} r={0.8} fill="white" opacity={0.9} />
-                  <circle cx={cx + 4.5} cy={headCy - 1.8} r={0.8} fill="white" opacity={0.9} />
-
-                  {/* Eyebrows */}
-                  <line
-                    x1={cx - 6} y1={headCy - 5} x2={cx - 2} y2={headCy - 5.5}
-                    stroke="hsl(0 0% 10%)" strokeWidth={1} strokeLinecap="round"
-                  />
-                  <line
-                    x1={cx + 2} y1={headCy - 5.5} x2={cx + 6} y2={headCy - 5}
-                    stroke="hsl(0 0% 10%)" strokeWidth={1} strokeLinecap="round"
-                  />
-
-                  {/* Nose */}
-                  <path
-                    d={`M${cx - 1},${headCy + 1} Q${cx},${headCy + 4} ${cx + 1},${headCy + 1}`}
-                    stroke={woman.skinHighlight}
-                    strokeWidth={0.8}
+                  {/* Rim light on head — subtle edge glow */}
+                  <ellipse
+                    cx={cx}
+                    cy={headY - 4}
+                    rx={15}
+                    ry={16}
                     fill="none"
+                    stroke="hsl(250 50% 70%)"
+                    strokeWidth={1}
+                    opacity={0.3}
                   />
-
-                  {/* Lips */}
-                  <ellipse cx={cx} cy={headCy + 6} rx={3.5} ry={1.8} fill={woman.lipColor} />
-                  {/* Lip highlight */}
-                  <ellipse cx={cx} cy={headCy + 5.5} rx={2} ry={0.6} fill="white" opacity={0.12} />
-
-                  {/* Smile when reacting */}
-                  {isReacting && reactionFrame > 1 && (
-                    <path
-                      d={`M${cx - 3},${headCy + 6} Q${cx},${headCy + 9} ${cx + 3},${headCy + 6}`}
-                      stroke={woman.lipColor}
-                      strokeWidth={1.5}
-                      fill="none"
-                      strokeLinecap="round"
-                    />
-                  )}
-
-                  {/* Earrings */}
-                  <circle cx={cx - 12} cy={headCy + 4} r={1.8} fill={woman.earringColor} />
-                  <circle cx={cx + 12} cy={headCy + 4} r={1.8} fill={woman.earringColor} />
                 </g>
 
-                {/* Arms */}
                 {/* Left arm */}
                 <path
-                  d={`M${cx - 16},${headCy + 28} Q${cx - 22},${headCy + 40} ${cx - 18},${headCy + 50}`}
-                  stroke={woman.skinTone}
-                  strokeWidth={4}
+                  d={`M${cx - 20},${headY + 30} Q${cx - 28 + pose.lean},${headY + 48} ${cx - 22},${headY + 58}`}
+                  stroke="hsl(var(--espresso))"
+                  strokeWidth={6}
                   fill="none"
                   strokeLinecap="round"
+                  style={{ transition: "d 0.3s ease-out" }}
                 />
-                {/* Left hand */}
-                <circle cx={cx - 18} cy={headCy + 50} r={3} fill={woman.skinTone} />
 
-                {/* Right arm - holding popcorn or gesturing */}
+                {/* Right arm — popcorn or resting */}
                 {hasPopcorn ? (
                   <g>
                     <path
-                      d={`M${cx + 16},${headCy + 28} Q${cx + 22},${headCy + 36} ${cx + 20},${headCy + 44}`}
-                      stroke={woman.skinTone}
-                      strokeWidth={4}
+                      d={`M${cx + 20},${headY + 30} Q${cx + 26},${headY + 40} ${cx + 22},${headY + 46}`}
+                      stroke="hsl(var(--espresso))"
+                      strokeWidth={6}
                       fill="none"
                       strokeLinecap="round"
                     />
-                    <circle cx={cx + 20} cy={headCy + 44} r={3} fill={woman.skinTone} />
-                    {renderPopcorn(cx + 20, headCy + 30)}
+                    {renderPopcorn(cx + 22, headY + 28)}
                   </g>
-                ) : isSpeaking && isReacting ? (
-                  // Gesturing hand up
-                  <g>
-                    <path
-                      d={`M${cx + 16},${headCy + 28} Q${cx + 26},${headCy + 20} ${cx + 24},${headCy + 12}`}
-                      stroke={woman.skinTone}
-                      strokeWidth={4}
-                      fill="none"
-                      strokeLinecap="round"
-                    />
-                    <circle cx={cx + 24} cy={headCy + 12} r={3} fill={woman.skinTone} />
-                  </g>
+                ) : isSpeaking && frame >= 3 ? (
+                  <path
+                    d={`M${cx + 20},${headY + 30} Q${cx + 30},${headY + 22} ${cx + 28},${headY + 14}`}
+                    stroke="hsl(var(--espresso))"
+                    strokeWidth={6}
+                    fill="none"
+                    strokeLinecap="round"
+                  />
                 ) : (
-                  <g>
-                    <path
-                      d={`M${cx + 16},${headCy + 28} Q${cx + 22},${headCy + 40} ${cx + 18},${headCy + 50}`}
-                      stroke={woman.skinTone}
-                      strokeWidth={4}
-                      fill="none"
-                      strokeLinecap="round"
-                    />
-                    <circle cx={cx + 18} cy={headCy + 50} r={3} fill={woman.skinTone} />
-                  </g>
+                  <path
+                    d={`M${cx + 20},${headY + 30} Q${cx + 28 - pose.lean},${headY + 48} ${cx + 22},${headY + 58}`}
+                    stroke="hsl(var(--espresso))"
+                    strokeWidth={6}
+                    fill="none"
+                    strokeLinecap="round"
+                  />
                 )}
               </g>
 
               {/* Speech bubble */}
-              {isSpeaking && isReacting && reactionFrame >= 2 && reactionFrame <= 9 && (
+              {isSpeaking && frame >= 2 && frame <= 5 && (
                 <g
                   style={{
-                    opacity: reactionFrame >= 2 ? 1 : 0,
+                    opacity: 1,
                     transition: "opacity 0.2s ease",
                   }}
                 >
                   <rect
-                    x={cx - 42}
-                    y={2}
-                    width={84}
-                    height={22}
-                    rx={10}
-                    fill="white"
-                    stroke="hsl(30 15% 85%)"
-                    strokeWidth={0.5}
+                    x={cx - 48}
+                    y={4}
+                    width={96}
+                    height={24}
+                    rx={12}
+                    fill="hsl(var(--cream))"
+                    stroke="hsl(var(--gold-light))"
+                    strokeWidth={0.8}
                   />
-                  {/* Bubble tail */}
                   <polygon
-                    points={`${cx - 4},24 ${cx + 4},24 ${cx},30`}
-                    fill="white"
+                    points={`${cx - 4},28 ${cx + 4},28 ${cx},34`}
+                    fill="hsl(var(--cream))"
                   />
                   <text
                     x={cx}
-                    y={16}
+                    y={19}
                     textAnchor="middle"
-                    fontSize="7"
-                    fontFamily="'Raleway', sans-serif"
+                    fontSize="8"
+                    fontFamily="var(--font-body)"
                     fontWeight="500"
-                    fill="hsl(30 15% 15%)"
+                    fill="hsl(var(--foreground))"
                   >
-                    {speechText}
+                    {speechTexts[activeSpeakers.indexOf(i)] || ""}
                   </text>
                 </g>
               )}
             </g>
           );
         })}
+
+        {/* Subtle film grain overlay */}
+        <rect
+          x="0" y="0" width="700" height="165"
+          fill="url(data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.3'/%3E%3C/svg%3E)"
+          opacity={0.06}
+          style={{ mixBlendMode: "overlay" }}
+        />
       </svg>
     </div>
   );
